@@ -1,7 +1,6 @@
-import re
-from rapidfuzz import process, fuzz
+from rapidfuzz import fuzz, process
 
-COUNTRY_LIST_FILE = 'wiki_scraper/country_list.txt'
+COUNTRY_LIST_FILE = "wiki_scraper/country_list.txt"
 
 ALIASES = {
     "north_korea": "democratic_people's_republic_of_korea",
@@ -24,12 +23,13 @@ ALIASES = {
     "iran": "iran_(islamic_republic_of)",
     "moldova": "republic_of_moldova",
     "congo brazzaville": "republic_of_the_congo",
-    "georgia": "georgia_(the_country)"
+    "georgia": "georgia_(the_country)",
 }
+
 
 def load_countries():
     countries = []
-    with open(COUNTRY_LIST_FILE, 'r', encoding='utf-8') as f:
+    with open(COUNTRY_LIST_FILE, "r", encoding="utf-8") as f:
         lines = f.readlines()
     for line in lines[1:]:  # Ignorer header
         country = line.strip()
@@ -37,10 +37,13 @@ def load_countries():
             countries.append(country)
     return countries
 
+
 COUNTRIES = load_countries()
 
+
 def normalize(text: str) -> str:
-    return text.lower().strip().replace(' ', '_')
+    return text.lower().strip().replace(" ", "_")
+
 
 def detect_country_in_question(question: str, threshold=80):
     question_norm = normalize(question)
@@ -56,7 +59,9 @@ def detect_country_in_question(question: str, threshold=80):
             return country
 
     # 3. Recherche fuzzy dans la liste officielle
-    results = process.extract(question_norm, COUNTRIES, scorer=fuzz.partial_ratio, limit=1)
+    results = process.extract(
+        question_norm, COUNTRIES, scorer=fuzz.partial_ratio, limit=1
+    )
     if results:
         best_match, score, _ = results[0]
         if score >= threshold:
@@ -65,6 +70,7 @@ def detect_country_in_question(question: str, threshold=80):
     # Pas trouvé
     return None
 
+
 # Exemple d'utilisation
 if __name__ == "__main__":
     questions = [
@@ -72,7 +78,7 @@ if __name__ == "__main__":
         "What is the capital of USA?",
         "Info on the Bahamas please",
         "Details about Côte d'Ivoire",
-        "South Korea history"
+        "South Korea history",
     ]
 
     for q in questions:

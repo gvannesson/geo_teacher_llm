@@ -1,5 +1,6 @@
 import os
 
+
 def find_empty_txt_files(directory):
     empty_files = []
     for filename in os.listdir(directory):
@@ -9,10 +10,11 @@ def find_empty_txt_files(directory):
                 empty_files.append(filename)
     return empty_files
 
+
 if __name__ == "__main__":
     directory = os.path.dirname(__file__)  # dossier wiki_scraper
     empty_files = find_empty_txt_files(directory)
-    
+
     if empty_files:
         print("Fichiers .txt vides trouvés :")
         for f in empty_files:

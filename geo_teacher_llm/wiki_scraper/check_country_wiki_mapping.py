@@ -1,8 +1,10 @@
 import os
 
+
 def slugify_country_name(name):
     """Slugify the country name as in your previous scraping."""
     return name.lower().replace(" ", "_") + ".txt"
+
 
 def check_country_files(country_list_path, scraper_folder):
     present_non_empty = []
@@ -10,7 +12,11 @@ def check_country_files(country_list_path, scraper_folder):
     missing = []
 
     with open(country_list_path, "r", encoding="utf-8") as f:
-        countries = [line.strip() for line in f.readlines() if line.strip() and not line.strip().lower().startswith("member state")]
+        countries = [
+            line.strip()
+            for line in f.readlines()
+            if line.strip() and not line.strip().lower().startswith("member state")
+        ]
 
     for country in countries:
         filename = slugify_country_name(country)
@@ -25,11 +31,14 @@ def check_country_files(country_list_path, scraper_folder):
 
     return present_non_empty, present_but_empty, missing
 
+
 if __name__ == "__main__":
     country_list_path = os.path.join(os.path.dirname(__file__), "country_list.txt")
     scraper_folder = os.path.dirname(__file__)
 
-    present_non_empty, present_but_empty, missing = check_country_files(country_list_path, scraper_folder)
+    present_non_empty, present_but_empty, missing = check_country_files(
+        country_list_path, scraper_folder
+    )
 
     print("✅ Pays avec fichier présent et non vide :", len(present_non_empty))
     for country, file in present_non_empty:

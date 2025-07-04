@@ -25,6 +25,8 @@ dependencies = [
     "langdetect>=1.0.9",
     "sentencepiece>=0.2.0",
     "sacremoses>=0.1.1",
+    "ruff>=0.12.2",
+    "black>=25.1.0",
 ]
 
 [tool.poetry]
@@ -36,6 +38,33 @@ authors = ["Ton Nom <ton.email@example.com>"]
 packages = [
   { include = "geo_teacher_llm" }
 ]
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+exclude = '''
+/(
+    \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+exclude = ["build", "dist", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E501"] # si tu souhaites ignorer la limite de ligne
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.poetry.scripts]
+format = "black geo_teacher_llm"
+lint = "ruff geo_teacher_llm"
 
 
 [build-system]

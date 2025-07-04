@@ -1,7 +1,5 @@
-from transformers import MarianMTModel, MarianTokenizer
 from langdetect import detect
-import torch
-
+from transformers import MarianMTModel, MarianTokenizer
 
 # Téléchargement du modèle Helsinki-NLP pour FR -> EN
 model_name = "Helsinki-NLP/opus-mt-fr-en"
@@ -15,6 +13,7 @@ def maybe_translate_to_english(text):
         return text
     else:
         return translate_to_english(text)
+
 
 def translate_to_english(text: str) -> str:
     """

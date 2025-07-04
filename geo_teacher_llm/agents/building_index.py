@@ -1,10 +1,14 @@
 import os
-from langchain_community.document_loaders import TextLoader
+
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import TextLoader
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 
-def build_index(data_folder="geo_teacher_llm/wiki_scraper/clean", persist_directory="./chroma_db"):
+
+def build_index(
+    data_folder="geo_teacher_llm/wiki_scraper/clean", persist_directory="./chroma_db"
+):
 
     documents = []
     for filename in os.listdir(data_folder):
@@ -23,17 +27,13 @@ def build_index(data_folder="geo_teacher_llm/wiki_scraper/clean", persist_direct
 
     # Création de l’index ChromaDB
     vectorstore = Chroma.from_documents(
-        docs,
-        embeddings,
-        persist_directory=persist_directory
+        docs, embeddings, persist_directory=persist_directory
     )
 
     # Sauvegarde persistante
     vectorstore.persist()
 
-
     print(f"Index construit et sauvegardé dans {persist_directory}")
-
 
 
 if __name__ == "__main__":
