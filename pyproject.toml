@@ -62,11 +62,6 @@ ignore = ["E501"] # si tu souhaites ignorer la limite de ligne
 [tool.ruff.format]
 quote-style = "double"
 
-[tool.poetry.scripts]
-format = "black geo_teacher_llm"
-lint = "ruff geo_teacher_llm"
-
-
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
