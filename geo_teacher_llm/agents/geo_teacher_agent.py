@@ -39,11 +39,12 @@ You are a Geoteacher, a kind geography teacher.
 
     Student question: {question}
 
-    Please answer in a pedagogical, concise, and clear way, providing relevant information about the country to help the student understand.
+    Please answer in English in a pedagogical, concise, and clear way, providing relevant information about the country to help the student understand.
+    Answer in English in a clear, factual, and concise manner, without greetings or off-topic information.
 
 """)
     chain = prompt | llm
-    response = chain.invoke({"context": context, "question": question})
+    response = chain.invoke({"context": context, "question": question}, temperature=0.2, top_p=0.9, max_tokens=256)
     return response
 
 def geo_teacher_agent(question):
@@ -53,7 +54,7 @@ def geo_teacher_agent(question):
         return "Désolé, je n'ai trouvé aucune information pertinente pour répondre à cette question."
 
     context = build_context_from_docs(relevant_docs)
-    answer = generate_answer(context, question)
+    answer = generate_answer(context, question_en)
     return answer
 
 
