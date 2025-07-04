@@ -16,7 +16,15 @@ dependencies = [
     "beautifulsoup4 (>=4.13.4,<5.0.0)",
     "rapidfuzz (>=3.13.0,<4.0.0)",
     "sentence-transformers (>=5.0.0,<6.0.0)",
-    "huggingface-hub (>=0.33.2,<0.34.0)"
+    "huggingface-hub (>=0.33.2,<0.34.0)",
+    "chromadb>=1.0.15",
+    "langchain-huggingface>=0.3.0",
+    "langchain-chroma>=0.2.4",
+    "transformers>=4.53.0",
+    "torch>=2.7.1",
+    "langdetect>=1.0.9",
+    "sentencepiece>=0.2.0",
+    "sacremoses>=0.1.1",
 ]
 
 [tool.poetry]

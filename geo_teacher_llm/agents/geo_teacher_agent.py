@@ -1,37 +1,64 @@
 import os
-from langchain.document_loaders import TextLoader
+from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.embeddings import OpenAIEmbeddings  # Ou un autre modèle
-from langchain.vectorstores import Chroma
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_chroma import Chroma
+from langchain_ollama import OllamaLLM
+from langchain_core.prompts import ChatPromptTemplate
+from translation_agent import maybe_translate_to_english
 
-def build_index(data_folder="wiki_scraper/clean", persist_directory="/chroma_db"):
 
-    documents = []
-    for filename in os.listdir(data_folder):
-        if filename.endswith(".txt"):
-            filepath = os.path.join(data_folder, filename)
-            loader = TextLoader(filepath, encoding="utf-8")
-            docs = loader.load()
-            documents.extend(docs)
-
-    # On split les docs pour ne pas avoir des blocs trop gros
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-    docs = text_splitter.split_documents(documents)
-
-    # Embeddings (à adapter selon tes credentials ou modèle local)
-    embeddings = OpenAIEmbeddings()
-
-    # Création de l’index ChromaDB
-    vectorstore = Chroma.from_documents(
-        docs,
-        embeddings,
-        persist_directory=persist_directory
+def load_vectorstore(persist_directory="./chroma_db"):
+    embeddings = HuggingFaceEmbeddings(model_name="WhereIsAI/UAE-Large-V1",
+                                       model_kwargs={"device": "cpu"})
+    vectorstore = Chroma(
+        persist_directory=persist_directory,
+        embedding_function=embeddings
     )
+    return vectorstore
 
-    # Sauvegarde persistante
-    vectorstore.persist()
+def search_relevant_chunks(question, k=5):
+    vectorstore = load_vectorstore()
+    relevant_docs = vectorstore.similarity_search(query=question, k=k)
+    return relevant_docs
 
-    print(f"Index construit et sauvegardé dans {persist_directory}")
+
+def build_context_from_docs(relevant_docs):
+    context = "\n\n".join([doc.page_content for doc in relevant_docs])
+    return context
+
+llm = OllamaLLM(model="llama3.2")
+
+def generate_answer(context, question):
+    prompt = ChatPromptTemplate.from_template("""
+You are a Geoteacher, a kind geography teacher.
+
+    Use the following context extracted from Wikipedia about the country:
+
+    {context}
+
+    Student question: {question}
+
+    Please answer in a pedagogical, concise, and clear way, providing relevant information about the country to help the student understand.
+
+""")
+    chain = prompt | llm
+    response = chain.invoke({"context": context, "question": question})
+    return response
+
+def geo_teacher_agent(question):
+    question_en = maybe_translate_to_english(question)
+    relevant_docs = search_relevant_chunks(question_en, k=5)
+    if not relevant_docs:
+        return "Désolé, je n'ai trouvé aucune information pertinente pour répondre à cette question."
+
+    context = build_context_from_docs(relevant_docs)
+    answer = generate_answer(context, question)
+    return answer
+
 
 if __name__ == "__main__":
-    build_index()
+    user_question = input("Pose ta question de géographie : ")
+    response = geo_teacher_agent(user_question)
+    print("\nRéponse de GeoTeacher LLM :\n")
+    print(response)
