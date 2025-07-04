@@ -30,7 +30,7 @@ jobs:
         run: uv pip install .  # si ton pyproject.toml est prêt à s'installer
 
       - name: Run Ruff
-        run: uv run ruff geo_teacher_llm
+        run: uv run ruff check geo_teacher_llm
 
       - name: Run Black
         run: uv run black --check geo_teacher_llm
