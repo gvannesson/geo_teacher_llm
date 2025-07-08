@@ -126,18 +126,21 @@ def route_decision(state):
     user_input = state["input"]
 
     if "weather" in user_input.lower() or "umbrella" in user_input.lower():
-        return {"route": "weather_node"}
-    elif "capital" in user_input.lower() or "population" in user_input.lower():
-        return {"route": "geo_node"}
+        # return {"route": "weather_node"}
+        return "weather_node"
+    elif "images" in user_input.lower() or "population" in user_input.lower():
+        # return {"route": "geo_node"}
+        return "image_node"
     else:
-        return {"route": "default_node"}
+        # return {"route": "default_node"}
+        return "geo_node"
 
 workflow.add_conditional_edges(
     "llm_router",
     route_decision,
     {
-        "weather": "weather_node",
-        "images": "image_node",
+        "weather_node": "weather_node",
+        "image_node": "image_node",
         "combine": "geo_node",
         "END": END
     }
