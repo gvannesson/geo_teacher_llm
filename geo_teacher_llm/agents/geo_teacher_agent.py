@@ -59,7 +59,7 @@ def geo_teacher_agent(question):
     question_en = maybe_translate_to_english(question)
     relevant_docs = search_relevant_chunks(question_en, k=5)
     if not relevant_docs:
-        return "Désolé, je n'ai trouvé aucune information pertinente pour répondre à cette question."
+        return "Sorry, I didn’t find any relevant information to answer this question."
 
     context = build_context_from_docs(relevant_docs)
     answer = generate_answer(context, question_en)
@@ -67,7 +67,7 @@ def geo_teacher_agent(question):
 
 
 if __name__ == "__main__":
-    user_question = input("Pose ta question de géographie : ")
+    user_question = input("Ask you geography question : ")
     response = geo_teacher_agent(user_question)
-    print("\nRéponse de GeoTeacher LLM :\n")
+    print("\nAnswer from GeoTeacher LLM :\n")
     print(response)

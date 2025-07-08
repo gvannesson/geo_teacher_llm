@@ -3,8 +3,8 @@ from rapidfuzz import fuzz, process
 COUNTRY_LIST_FILE = "wiki_scraper/country_list.txt"
 
 ALIASES = {
-    "north_korea": "democratic_people's_republic_of_korea",
-    "south_korea": "republic_of_korea",
+    "north korea": "democratic_people's_republic_of_korea",
+    "south korea": "republic_of_korea",
     "usa": "united_states_of_america",
     "us": "united_states_of_america",
     "uk": "united_kingdom_of_great_britain_and_northern_ireland",
@@ -16,6 +16,7 @@ ALIASES = {
     "netherlands": "netherlands_(kingdom_of_the)",
     "england": "united_kingdom_of_great_britain_and_northern_ireland",
     "great_britain": "united_kingdom_of_great_britain_and_northern_ireland",
+    "UK":"united_kingdom_of_great_britain_and_northern_ireland",
     "micronesia": "micronesia_(federated_states_of)",
     "Congo Kinshasa": "democratic_republic_of_the_congo",
     "tanzania": "united_republic_of_tanzania",
@@ -23,7 +24,7 @@ ALIASES = {
     "iran": "iran_(islamic_republic_of)",
     "moldova": "republic_of_moldova",
     "congo brazzaville": "republic_of_the_congo",
-    "georgia": "georgia_(the_country)",
+    "georgia": "georgia_(the_country)"
 }
 
 
