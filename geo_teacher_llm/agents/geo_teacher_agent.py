@@ -56,6 +56,7 @@ You are a Geoteacher, a kind geography teacher.
 
 
 def geo_teacher_agent(question):
+    print('hellloooooooooooooooooo')
     question_en = maybe_translate_to_english(question)
     relevant_docs = search_relevant_chunks(question_en, k=5)
     if not relevant_docs:

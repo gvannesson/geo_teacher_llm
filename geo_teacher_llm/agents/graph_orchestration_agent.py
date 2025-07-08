@@ -123,16 +123,21 @@ workflow.set_entry_point("llm_router")
 
 def route_decision(state):
     print(f"DEBUG: state keys before routing: {list(state.keys())}")
+    print(state['messages'])
+    print(state['input'])
     user_input = state["input"]
 
     if "weather" in user_input.lower() or "umbrella" in user_input.lower():
         # return {"route": "weather_node"}
+        print('#########weather')
         return "weather_node"
     elif "images" in user_input.lower() or "population" in user_input.lower():
         # return {"route": "geo_node"}
+        print('#########images')
         return "image_node"
     else:
         # return {"route": "default_node"}
+        print('#########geo')
         return "geo_node"
 
 workflow.add_conditional_edges(
@@ -149,11 +154,11 @@ workflow.add_conditional_edges(
 
 # 🚩 Lier les étapes pour "combine"
 workflow.add_edge("geo_node", "weather_node")
-workflow.add_edge("weather_node", "image_node")
+workflow.add_edge("weather_node", END)
 workflow.add_edge("image_node", END)
 
 # 🚩 Terminer le flux après image_node
-workflow.add_edge("image_node", END)
+# workflow.add_edge("image_node", END)
 
 # 🚩 Terminer le flux pour les autres cas non-combinés
 workflow.add_edge("weather_node", END)
@@ -170,6 +175,6 @@ while True:
     if user_input.lower() == "exit":
         break
     response = app.invoke({"input": user_input})
-    print(response)
+    print('~~~~~~~~~~~~',response)
     print("🪐 Réponse de l'agent :\n")
     print(response)
