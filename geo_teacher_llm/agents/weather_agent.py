@@ -46,6 +46,7 @@ def get_weather(capital_name, country=None, lang="en"):
     """
     Retrieve current weather for a capital city using WeatherAPI.
     """
+    print("weeeeeeeeeeeeeeaaaaaaaathhhhhhhhheeeerrrr")
     if not API_KEY:
         raise ValueError("WeatherAPI key not found. Please set WEATHER_API_KEY in your .env file.")
     print("weeeeeeeeeeeeeeaaaaaaaathhhhhhhhheeeerrrr")

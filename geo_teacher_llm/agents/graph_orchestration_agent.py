@@ -12,7 +12,7 @@ from geo_teacher_llm.agents.weather_agent import get_weather
 from geo_teacher_llm.agents.image_agent import fetch_country_landscape_images
 from langchain_core.runnables import RunnableLambda, RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
-
+from IPython.display import Image, display
 from typing import TypedDict, List, Any
 
 class GeoTeacherState(TypedDict):
@@ -166,15 +166,19 @@ workflow.add_edge("weather_node", END)
 
 # Compiler le graphe prêt à l'exécution
 app = workflow.compile()
+png = app.get_graph().draw_mermaid_png()
+
 
 # 9️⃣ CLI loop
 while True:
-    # user_input = input("Pose ta question de géographie (ou 'exit') : ")
-    user_input="do i need an umbrella in Lima ?"
+    user_input = input("Pose ta question de géographie (ou 'exit') : ")
+    # user_input="do i need an umbrella in Lima ?"
     print(user_input)
     if user_input.lower() == "exit":
         break
-    response = app.invoke({"input": user_input})
+    response = app.invoke({"input": user_input}, {"recursion_limit": 3})
+    with open("langgrpah.png", "wb") as file:
+        file.write(png)
     print('~~~~~~~~~~~~',response)
     print("🪐 Réponse de l'agent :\n")
     print(response)
