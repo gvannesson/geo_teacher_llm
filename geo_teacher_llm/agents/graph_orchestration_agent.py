@@ -15,6 +15,14 @@ from langchain_core.output_parsers import StrOutputParser
 from IPython.display import Image, display
 from typing import TypedDict, List, Any
 
+from langsmith import traceable
+
+os.environ["LANGSMITH_TRACING"]="true"
+os.environ["LANGSMITH_ENDPOINT"]="https://api.smith.langchain.com"
+os.environ["LANGSMITH_API_KEY"]="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"
+os.environ["LANGSMITH_PROJECT"]="geo_teacher_llm"
+
+
 class GeoTeacherState(TypedDict):
     input: str
     route: str
@@ -65,7 +73,7 @@ Question: {input}
 """)
 
 from langchain_core.messages import HumanMessage, AIMessage
-
+@traceable
 def create_tool_call_message(tool_name, content="", tool_args={}):
     """
     Manually create an AIMessage with the structure ToolNode expects.
@@ -84,15 +92,26 @@ def create_tool_call_message(tool_name, content="", tool_args={}):
         }
     )
 
-
+@traceable
 def prepare_toolnode_input(state):
-    # state contient {"route": "weather", "messages": [HumanMessage(...)]}
+    print("ééééééééééééééé")
+    print(state)
     route = state["route"]
     messages = state["messages"]
-    # Crée l'AIMessage de routage pour ToolNode
-    ai_message = create_tool_call_message(tool_name=route, content="", tool_args={})
+    print('~~~~~~~~###~~~~~~~~~~', route)
+    print('~~~~~~~~###~~~~~~~~~~', messages)
+    route_to_tool_name = {
+        "weather": "get_weather_from_capital",
+        "images": "get_images_of_country",
+        "combine": "answer_geography_question"
+    }
+    tool_name = route_to_tool_name.get(route)
+    print(f"🪐 Preparing ToolNode input for tool: {tool_name}")
+
+    ai_message = create_tool_call_message(tool_name=tool_name, content="", tool_args={})
     messages.append(ai_message)
     return {"messages": messages}
+
 
 llm_router_chain = (
     {"input": RunnablePassthrough()}
@@ -121,6 +140,7 @@ workflow.add_node("image_node", image_node)
 
 workflow.set_entry_point("llm_router")
 
+@traceable
 def route_decision(state):
     print(f"DEBUG: state keys before routing: {list(state.keys())}")
     print(state['messages'])
@@ -139,6 +159,19 @@ def route_decision(state):
         # return {"route": "default_node"}
         print('#########geo')
         return "geo_node"
+    
+# def route_decision(state):
+#     route = state.get("route", "")
+#     print(f"🧩 Routing with LLM route: {route}")
+#     if route == "weather":
+#         print('######weather')
+#         return "weather_node"
+#     elif route == "images":
+#         return "image_node"
+#     else:  # combine or fallback
+#         return "combine"
+
+
 
 workflow.add_conditional_edges(
     "llm_router",
@@ -146,7 +179,7 @@ workflow.add_conditional_edges(
     {
         "weather_node": "weather_node",
         "image_node": "image_node",
-        "combine": "geo_node",
+        "geo_node": "geo_node",
         "END": END
     }
 )
@@ -177,6 +210,13 @@ while True:
     if user_input.lower() == "exit":
         break
     response = app.invoke({"input": user_input}, {"recursion_limit": 3})
+    if "messages" in response and response["messages"]:
+        last_message = response["messages"][-1]
+        print("\n🪐 Réponse de l'agent :")
+        print(last_message)
+    else:
+        print("🪐 Pas de message dans la réponse :", response)
+
     with open("langgrpah.png", "wb") as file:
         file.write(png)
     print('~~~~~~~~~~~~',response)

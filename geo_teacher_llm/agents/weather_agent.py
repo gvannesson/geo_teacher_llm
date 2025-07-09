@@ -42,20 +42,20 @@ def get_capital_from_country(country_name):
     country_key = ALIASES.get(country_key, country_key)
     return COUNTRY_TO_CAPITAL.get(country_key)
 
-def get_weather(capital_name, country=None, lang="en"):
+def get_weather(state):
     """
     Retrieve current weather for a capital city using WeatherAPI.
     """
-    print("weeeeeeeeeeeeeeaaaaaaaathhhhhhhhheeeerrrr")
+    capital_name="London"
+    country="England"
     if not API_KEY:
         raise ValueError("WeatherAPI key not found. Please set WEATHER_API_KEY in your .env file.")
-    print("weeeeeeeeeeeeeeaaaaaaaathhhhhhhhheeeerrrr")
     query = f"{capital_name},{country}" if country else capital_name
 
     params = {
         "key": API_KEY,
         "q": query,
-        "lang": lang
+        "lang": "en"
     }
 
     try:
@@ -76,9 +76,9 @@ def get_weather(capital_name, country=None, lang="en"):
             f"with a temperature of {temp_c}°C (feels like {feelslike_c}°C) "
             f"and humidity at {humidity}%."
         )
-
-        return weather_report
-
+        state['messages']= weather_report
+        return state
+    
     except requests.exceptions.HTTPError as http_err:
         return f"HTTP error occurred: {http_err}"
     except requests.exceptions.RequestException as req_err:
