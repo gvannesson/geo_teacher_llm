@@ -2,6 +2,7 @@ import os
 import requests
 from dotenv import load_dotenv
 from detect_country import detect_country_in_question
+from weather_agent import get_capital_from_country, detect_country_from_capital_in_question
 load_dotenv()
 
 UNSPLASH_ACCESS_KEY = os.getenv("UNSPLASH_ACCESS_KEY")
@@ -12,6 +13,14 @@ def fetch_country_landscape_images(state, num_images=2):
     if not UNSPLASH_ACCESS_KEY:
         raise ValueError("UNSPLASH_ACCESS_KEY environment variable not set.")
     detect_country_in_question(state)
+    if state.get('country'):
+        get_capital_from_country(state)
+    else:
+        detect_country_from_capital_in_question(state)
+
+    if not state.get('capital_city') and not state.get('country'):
+        print('pas de pays ni capitale')
+        return state
     params = {
         "query": f"{state['country']} landscape",
         "per_page": num_images,

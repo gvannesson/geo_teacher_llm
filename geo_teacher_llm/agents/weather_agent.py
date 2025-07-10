@@ -36,6 +36,7 @@ ALIASES = {
 
 with open("wiki_scraper/clean/country_to_capital.json", "r", encoding="utf-8") as f:
     COUNTRY_TO_CAPITAL = json.load(f)
+    CAPITAL_TO_COUNTRY = {capital.lower(): country for country, capital in COUNTRY_TO_CAPITAL.items()}
 
 def get_capital_from_country(state):
     country_key = state['country'].lower().strip().replace(" ", "_")
@@ -44,6 +45,28 @@ def get_capital_from_country(state):
     state['capital_city']=COUNTRY_TO_CAPITAL.get(country_key)
     return COUNTRY_TO_CAPITAL.get(country_key)
 
+def detect_country_from_capital_in_question(state):
+    """
+    Détecte si une capitale est mentionnée dans state['input'].
+    Si oui, ajoute state['country'] avec le pays associé.
+    """
+    question_lower = state["input"].lower()
+    
+    for capital, country in CAPITAL_TO_COUNTRY.items():
+        if capital in question_lower:
+            state["capital_city"]=capital
+            # Appliquer alias si nécessaire
+            country_key = country.lower().strip().replace(" ", "_")
+            country_key = ALIASES.get(country_key, country_key)
+            state["country"] = country_key
+            print(f"✅ Détection automatique : capitale '{capital}' -> pays '{country_key}'")
+            return state
+
+    print("❌ Aucune capitale détectée automatiquement dans la question.")
+    return state
+
+
+
 def get_weather(state):
     """
     Retrieve current weather for a capital city using WeatherAPI.
@@ -51,6 +74,12 @@ def get_weather(state):
     detect_country_in_question(state)
     if state.get('country'):
         get_capital_from_country(state)
+    else:
+        detect_country_from_capital_in_question(state)
+
+    if not state.get('capital_city') and not state.get('country'):
+        print('pas de pays ni capitale')
+        return state
 
     if not API_KEY:
         raise ValueError("WeatherAPI key not found. Please set WEATHER_API_KEY in your .env file.")

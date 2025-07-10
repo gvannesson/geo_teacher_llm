@@ -33,31 +33,6 @@ class GeoTeacherState(TypedDict):
     geo_teacher_answer:str
 
 
-
-# Wrapper Tool 1 : récupérer capitale
-# tool_get_answer = Tool(
-#     name="answer_geography_question",
-#     description="Answer a geography question",
-#     func=geo_teacher_agent,
-# )
-
-# # Wrapper Tool 2 : récupérer météo
-# tool_get_weather = Tool(
-#     name="get_weather_from_capital",
-#     description="Get the current weather in a country by providing the capital name.",
-#     func=get_weather,
-# )
-
-# # Wrapper Tool 2 : récupérer météo
-# tool_get_images = Tool(
-#     name="get_images_of_country",
-#     description="Get images of a country.",
-#     func=fetch_country_landscape_images,
-# )
-
-# # 🚩 2) Instancier le LLM orchestrateur avec function calling
-# tools = [tool_get_answer, tool_get_weather, tool_get_images]
-
 llm = ChatOllama(
     model="llama3.2",
     temperature=0,
@@ -78,35 +53,17 @@ The answer will be one word: weather, images or geography
 Question: {input}
 """)
 
+
 llm_router_chain = (
     {"input": RunnablePassthrough()}
     | router_prompt
     | llm
     | StrOutputParser()
-    | (lambda route: {"route": route.strip(),  "messages": [
-        HumanMessage(content="What is the weather in Berlin?"),
-        AIMessage(
-            content="",
-            additional_kwargs={
-                "tool_calls": [
-                    {
-                        "id": "tool_call_id",
-                        "function": {
-                            "name": "get_weather",
-                            "arguments": {"city": "Berlin"}
-                        },
-                        "type": "function"
-                    }
-                ]
-            }
-        )
-    ]})
+    | (lambda route: {"route": route.strip()})
 )
 
 
-# weather_node = ToolNode(tools=[tool_get_weather])
-# geo_node = ToolNode(tools=[tool_get_answer])
-# image_node = ToolNode(tools=[tool_get_images])
+
 # 🚩 3) Créer le graph LangGraph avec nœud LLM central
 workflow = StateGraph(GeoTeacherState)
 
@@ -144,10 +101,13 @@ workflow.add_conditional_edges(
 
 
 # End after execution
-workflow.add_edge("geo_node", END)
+
 workflow.add_edge("weather_node", END)
 workflow.add_edge("image_node", END)
 
+workflow.add_edge("geo_node", "weather_node")
+workflow.add_edge("weather_node", "image_node")
+workflow.add_edge("image_node", END)
 # Compile
 app = workflow.compile()
 
