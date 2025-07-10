@@ -8,9 +8,9 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.12,<4.0"
 dependencies = [
-    "langchain (>=0.3.26,<0.4.0)",
-    "langchain-openai (>=0.3.27,<0.4.0)",
-    "requests (>=2.32.4,<3.0.0)",
+    "langchain>=0.3.26,<0.4.0",
+    "langchain-openai>=0.3.27,<0.4.0",
+    "requests>=2.32.4,<3.0.0",
     "langchain-community (>=0.3.27,<0.4.0)",
     "langchain-ollama (>=0.3.3,<0.4.0)",
     "beautifulsoup4 (>=4.13.4,<5.0.0)",
@@ -27,6 +27,13 @@ dependencies = [
     "sacremoses>=0.1.1",
     "ruff>=0.12.2",
     "black>=25.1.0",
+    "dotenv>=0.9.9",
+    "python-dotenv>=1.1.1",
+    "pandas>=2.3.0",
+    "openpyxl>=3.1.5",
+    "langgraph>=0.5.1",
+    "ipython>=9.4.0",
+    "langsmith>=0.4.4",
 ]
 
 [tool.poetry]
