@@ -27,37 +27,41 @@ class GeoTeacherState(TypedDict):
     input: str
     route: str
     messages: list
+    country:str
+    images:list
+    capital_city:str
+    geo_teacher_answer:str
+
 
 
 # Wrapper Tool 1 : récupérer capitale
-tool_get_answer = Tool(
-    name="answer_geography_question",
-    description="Answer a geography question",
-    func=geo_teacher_agent,
-)
+# tool_get_answer = Tool(
+#     name="answer_geography_question",
+#     description="Answer a geography question",
+#     func=geo_teacher_agent,
+# )
 
-# Wrapper Tool 2 : récupérer météo
-tool_get_weather = Tool(
-    name="get_weather_from_capital",
-    description="Get the current weather in a country by providing the capital name.",
-    func=get_weather,
-)
+# # Wrapper Tool 2 : récupérer météo
+# tool_get_weather = Tool(
+#     name="get_weather_from_capital",
+#     description="Get the current weather in a country by providing the capital name.",
+#     func=get_weather,
+# )
 
-# Wrapper Tool 2 : récupérer météo
-tool_get_images = Tool(
-    name="get_images_of_country",
-    description="Get images of a country.",
-    func=fetch_country_landscape_images,
-)
+# # Wrapper Tool 2 : récupérer météo
+# tool_get_images = Tool(
+#     name="get_images_of_country",
+#     description="Get images of a country.",
+#     func=fetch_country_landscape_images,
+# )
 
-# 🚩 2) Instancier le LLM orchestrateur avec function calling
-tools = [tool_get_answer, tool_get_weather, tool_get_images]
+# # 🚩 2) Instancier le LLM orchestrateur avec function calling
+# tools = [tool_get_answer, tool_get_weather, tool_get_images]
 
 llm = ChatOllama(
     model="llama3.2",
     temperature=0,
-    base_url="http://localhost:11434",
-    tools=tools,
+    base_url="http://localhost:11434"
 )
 
 # 2️⃣ Router prompt
@@ -100,16 +104,16 @@ llm_router_chain = (
 )
 
 
-weather_node = ToolNode(tools=[tool_get_weather])
-geo_node = ToolNode(tools=[tool_get_answer])
-image_node = ToolNode(tools=[tool_get_images])
+# weather_node = ToolNode(tools=[tool_get_weather])
+# geo_node = ToolNode(tools=[tool_get_answer])
+# image_node = ToolNode(tools=[tool_get_images])
 # 🚩 3) Créer le graph LangGraph avec nœud LLM central
 workflow = StateGraph(GeoTeacherState)
 
 workflow.add_node("llm_router", llm_router_chain)
 workflow.add_node("weather_node", get_weather)
-workflow.add_node("geo_node", geo_node)
-workflow.add_node("image_node", image_node)
+workflow.add_node("geo_node", geo_teacher_agent)
+workflow.add_node("image_node", fetch_country_landscape_images)
 
 workflow.set_entry_point("llm_router")
 
@@ -153,8 +157,12 @@ if __name__ == "__main__":
         user_input = input("Pose ta question de géographie (ou 'exit') : ")
         if user_input.lower() == "exit":
             break
-        
         response = app.invoke({"input": user_input})
         print("\n🪐 Réponse :")
-        print(response['messages'])
+        if response.get('messages'):
+            print(response['messages'])
+        if response.get('images'):
+            print(response['images'])
+        if response.get('geo_teacher_answer'):
+            print(response['geo_teacher_answer'])
         print("\n---\n")

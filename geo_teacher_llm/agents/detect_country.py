@@ -46,18 +46,22 @@ def normalize(text: str) -> str:
     return text.lower().strip().replace(" ", "_")
 
 
-def detect_country_in_question(question: str, threshold=80):
-    question_norm = normalize(question)
-
+def detect_country_in_question(state: str, threshold=80):
+    question_norm = normalize(state['input'])
+    for country in COUNTRIES:
+        if country.lower() in question_norm:
+            print("liste officielle")
+            state['country']=country
+            return state
     # 1. Recherche d'alias dans la question
     for alias, country in ALIASES.items():
         if alias in question_norm:
-            return country
-
+            print('alias')
+            state['country']=country
+            return state
+ 
     # 2. Recherche exact dans la liste officielle
-    for country in COUNTRIES:
-        if country in question_norm:
-            return country
+
 
     # 3. Recherche fuzzy dans la liste officielle
     results = process.extract(
@@ -66,7 +70,9 @@ def detect_country_in_question(question: str, threshold=80):
     if results:
         best_match, score, _ = results[0]
         if score >= threshold:
-            return best_match
+            print('tentative')
+            state['country']=best_match
+            return state
 
     # Pas trouvé
     return None
@@ -77,6 +83,7 @@ if __name__ == "__main__":
     questions = [
         "Tell me about North Korea",
         "What is the capital of USA?",
+        "what is the weather in australia ?"
         "Info on the Bahamas please",
         "Details about Côte d'Ivoire",
         "South Korea history",

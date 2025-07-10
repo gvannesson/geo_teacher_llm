@@ -2,16 +2,17 @@ import os
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import TextLoader
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 
 
 def build_index(
-    data_folder="geo_teacher_llm/wiki_scraper/clean", persist_directory="./chroma_db"
+    data_folder="geo_teacher_llm/wiki_scraper", persist_directory="./chroma_db"
 ):
 
     documents = []
     for filename in os.listdir(data_folder):
+        print(filename)
         if filename.endswith(".txt"):
             filepath = os.path.join(data_folder, filename)
             loader = TextLoader(filepath, encoding="utf-8")

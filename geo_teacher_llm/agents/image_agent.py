@@ -1,18 +1,19 @@
 import os
 import requests
 from dotenv import load_dotenv
+from detect_country import detect_country_in_question
 load_dotenv()
 
 UNSPLASH_ACCESS_KEY = os.getenv("UNSPLASH_ACCESS_KEY")
 
 UNSPLASH_URL = "https://api.unsplash.com/search/photos"
 
-def fetch_country_landscape_images(country_name, num_images=2):
+def fetch_country_landscape_images(state, num_images=2):
     if not UNSPLASH_ACCESS_KEY:
         raise ValueError("UNSPLASH_ACCESS_KEY environment variable not set.")
-
+    detect_country_in_question(state)
     params = {
-        "query": f"{country_name} landscape",
+        "query": f"{state['country']} landscape",
         "per_page": num_images,
         "client_id": UNSPLASH_ACCESS_KEY,
         "orientation": "landscape",
@@ -31,8 +32,8 @@ def fetch_country_landscape_images(country_name, num_images=2):
             "photographer_url": result["user"]["links"]["html"]
         }
         images.append(image_info)
-
-    return images
+    state['images']=images
+    return state
 
 if __name__ == "__main__":
     country = input("Enter country name: ")

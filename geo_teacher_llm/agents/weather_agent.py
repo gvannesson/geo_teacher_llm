@@ -2,6 +2,7 @@ import os
 import requests
 from dotenv import load_dotenv
 import json
+from detect_country import detect_country_in_question
 load_dotenv()
 
 API_KEY = os.getenv("WEATHER_API_KEY")
@@ -36,21 +37,24 @@ ALIASES = {
 with open("wiki_scraper/clean/country_to_capital.json", "r", encoding="utf-8") as f:
     COUNTRY_TO_CAPITAL = json.load(f)
 
-def get_capital_from_country(country_name):
-    country_key = country_name.lower().strip().replace(" ", "_")
+def get_capital_from_country(state):
+    country_key = state['country'].lower().strip().replace(" ", "_")
     # Appliquer alias si nécessaire
     country_key = ALIASES.get(country_key, country_key)
+    state['capital_city']=COUNTRY_TO_CAPITAL.get(country_key)
     return COUNTRY_TO_CAPITAL.get(country_key)
 
 def get_weather(state):
     """
     Retrieve current weather for a capital city using WeatherAPI.
     """
-    capital_name="London"
-    country="England"
+    detect_country_in_question(state)
+    if state.get('country'):
+        get_capital_from_country(state)
+
     if not API_KEY:
         raise ValueError("WeatherAPI key not found. Please set WEATHER_API_KEY in your .env file.")
-    query = f"{capital_name},{country}" if country else capital_name
+    query = f"{state['capital_city']},{state['country']}" if state.get('country') else state['capital_city']
 
     params = {
         "key": API_KEY,
