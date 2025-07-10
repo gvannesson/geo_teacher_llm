@@ -34,6 +34,8 @@ dependencies = [
     "langgraph>=0.5.1",
     "ipython>=9.4.0",
     "langsmith>=0.4.4",
+    "passlib>=1.7.4",
+    "sqlmodel>=0.0.24",
 ]
 
 [tool.poetry]
