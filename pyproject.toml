@@ -36,6 +36,12 @@ dependencies = [
     "langsmith>=0.4.4",
     "passlib>=1.7.4",
     "sqlmodel>=0.0.24",
+    "psycopg2-binary>=2.9.10",
+    "fastapi>=0.116.0",
+    "sqlalchemy>=2.0.41",
+    "uvicorn>=0.35.0",
+    "pydantic[email]>=2.11.7",
+    "jwt>=1.4.0",
 ]
 
 [tool.poetry]
