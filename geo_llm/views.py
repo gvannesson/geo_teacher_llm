@@ -13,15 +13,11 @@ class QuestionView(LoginRequiredMixin, FormView):
     login_url='/login'
     model = Question
     form_class = QuestionForm
-    # success_url= reverse_lazy('ask_question')
     def form_valid(self, form):
         question = form.cleaned_data['question_text']
-        print('HEEEEEEEEEEEEEEEEEEEELLLLLOOOOOOO')
         response = app.invoke({"input": question})
-        print(response)
         if isinstance(response, dict):
             answer = response.get("geo_teacher_answer", "No answer returned.")
-            print(answer)
         else:
             answer = str(response)
 
