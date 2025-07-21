@@ -8,11 +8,13 @@ tokenizer = MarianTokenizer.from_pretrained(model_name)
 model = MarianMTModel.from_pretrained(model_name).to("cpu")
 
 
-def maybe_translate_to_english(text):
+def maybe_translate_to_english(state):
+    text=state['input']
     if detect(text) == "en":
-        return text
+        return state
     else:
-        return translate_to_english(text)
+        state['input']= translate_to_english(text)
+        return state
 
 
 def translate_to_english(text: str) -> str:

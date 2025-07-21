@@ -1,0 +1,24 @@
+{% block content %}
+<h1>Poser une question de géographie</h1>
+<form method="post">
+  {% csrf_token %}
+  <textarea name="question_text" rows="4" cols="50" placeholder="Pose ta question ici"></textarea><br>
+  <button type="submit">Envoyer</button>
+</form>
+
+{% if answer %}
+  <h2>Réponse :</h2>
+  <p>{{ answer }}</p>
+  {% if images %}
+    <h3>Images :</h3>
+    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+      {% for image in images %}
+        <div>
+          <img src="{{ image.url }}" alt="image" style="max-width: 300px; border-radius: 8px;">
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  <p>{{ messages }}</p>
+{% endif %}
+{% endblock %}

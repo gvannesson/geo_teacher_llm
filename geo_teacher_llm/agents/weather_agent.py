@@ -2,7 +2,9 @@ import os
 import requests
 from dotenv import load_dotenv
 import json
-from detect_country import detect_country_in_question
+from geo_teacher_llm.agents.detect_country import detect_country_in_question
+from unidecode import unidecode
+
 load_dotenv()
 
 API_KEY = os.getenv("WEATHER_API_KEY")
@@ -22,7 +24,7 @@ ALIASES = {
     "netherlands": "netherlands_(kingdom_of_the)",
     "england": "united_kingdom_of_great_britain_and_northern_ireland",
     "great_britain": "united_kingdom_of_great_britain_and_northern_ireland",
-    "UK":"united_kingdom_of_great_britain_and_northern_ireland",
+    "UK": "united_kingdom_of_great_britain_and_northern_ireland",
     "micronesia": "micronesia_(federated_states_of)",
     "Congo_Kinshasa": "democratic_republic_of_the_congo",
     "tanzania": "united_republic_of_tanzania",
@@ -30,20 +32,26 @@ ALIASES = {
     "iran": "iran_(islamic_republic_of)",
     "moldova": "republic_of_moldova",
     "congo_brazzaville": "republic_of_the_congo",
-    "georgia": "georgia_(the_country)"
+    "georgia": "georgia_(the_country)",
 }
 
 
-with open("wiki_scraper/clean/country_to_capital.json", "r", encoding="utf-8") as f:
+with open("geo_teacher_llm/wiki_scraper/clean/country_to_capital.json", "r", encoding="utf-8") as f:
     COUNTRY_TO_CAPITAL = json.load(f)
-    CAPITAL_TO_COUNTRY = {capital.lower(): country for country, capital in COUNTRY_TO_CAPITAL.items()}
+    CAPITAL_TO_COUNTRY = {
+        capital.lower(): country for country, capital in COUNTRY_TO_CAPITAL.items()
+    }
+
 
 def get_capital_from_country(state):
-    country_key = state['country'].lower().strip().replace(" ", "_")
+    if not state.get("country"):
+        return state
+    country_key = state["country"].lower().strip().replace(" ", "_")
     # Appliquer alias si nécessaire
     country_key = ALIASES.get(country_key, country_key)
-    state['capital_city']=COUNTRY_TO_CAPITAL.get(country_key)
-    return COUNTRY_TO_CAPITAL.get(country_key)
+    state["capital_city"] = COUNTRY_TO_CAPITAL.get(country_key)
+    return state
+
 
 def detect_country_from_capital_in_question(state):
     """
@@ -51,45 +59,50 @@ def detect_country_from_capital_in_question(state):
     Si oui, ajoute state['country'] avec le pays associé.
     """
     question_lower = state["input"].lower()
-    
+
+    if state.get("capital_city") or state.get("country"):
+        print("ℹ️ Capital ou pays déjà présent dans le state, pas de détection supplémentaire.")
+        return state
+
     for capital, country in CAPITAL_TO_COUNTRY.items():
         if capital in question_lower:
-            state["capital_city"]=capital
+            state["capital_city"] = capital
             # Appliquer alias si nécessaire
             country_key = country.lower().strip().replace(" ", "_")
             country_key = ALIASES.get(country_key, country_key)
             state["country"] = country_key
-            print(f"✅ Détection automatique : capitale '{capital}' -> pays '{country_key}'")
+            print(
+                f"✅ Détection automatique : capitale '{capital}' -> pays '{country_key}'"
+            )
             return state
 
     print("❌ Aucune capitale détectée automatiquement dans la question.")
     return state
 
 
-
 def get_weather(state):
     """
     Retrieve current weather for a capital city using WeatherAPI.
     """
-    detect_country_in_question(state)
-    if state.get('country'):
-        get_capital_from_country(state)
-    else:
-        detect_country_from_capital_in_question(state)
+    if state.get("city"):
+        city = unidecode(state["city"])
+        country = state.get("country", "")
+        query = f"{city},{country}" if country else city
 
-    if not state.get('capital_city') and not state.get('country'):
-        print('pas de pays ni capitale')
-        return state
+    else:
+        if not state.get("capital_city") and not state.get("country"):
+            print("❌ Pas de pays ni capitale détectés, impossible de récupérer la météo.")
+            return state
+
+        query = f"{state['capital_city']},{state['country']}"
+        print(f"🌦️ Recherche météo sur capitale='{state.get('capital_city')}', pays='{state.get('country')}'")
 
     if not API_KEY:
-        raise ValueError("WeatherAPI key not found. Please set WEATHER_API_KEY in your .env file.")
-    query = f"{state['capital_city']},{state['country']}" if state.get('country') else state['capital_city']
+        raise ValueError(
+            "WeatherAPI key not found. Please set WEATHER_API_KEY in your .env file."
+        )
 
-    params = {
-        "key": API_KEY,
-        "q": query,
-        "lang": "en"
-    }
+    params = {"key": API_KEY, "q": query, "lang": "en"}
 
     try:
         response = requests.get(BASE_URL, params=params, timeout=10)
@@ -109,20 +122,23 @@ def get_weather(state):
             f"with a temperature of {temp_c}°C (feels like {feelslike_c}°C) "
             f"and humidity at {humidity}%."
         )
-        state['messages']= weather_report
+        state["weather_info"] = weather_report
         return state
-    
+
     except requests.exceptions.HTTPError as http_err:
-        return f"HTTP error occurred: {http_err}"
+        state["weather_info"] = f"HTTP error occurred while retrieving weather: {http_err}"
     except requests.exceptions.RequestException as req_err:
-        return f"Request error occurred: {req_err}"
+        state["weather_info"] = f"Request error occurred while retrieving weather: {req_err}"
     except KeyError:
-        return "Could not retrieve weather data. Please verify the city name."
+        state["weather_info"] = "Could not retrieve weather data. Please verify the city name."
+
+    return state
+
 
 if __name__ == "__main__":
-    country = input("Enter the country: ")
-    capital = get_capital_from_country(country)
-    if capital:
-        print(get_weather(capital, country=country))
-    else:
-        print("Capital not found for this country.")
+    state={}
+    state['city']= "Grenoble"
+    state['capital_city']= "Paris"
+    state['country']= "France"
+    print(get_weather(state))
+

@@ -2,11 +2,11 @@ from langchain_chroma import Chroma
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_ollama import OllamaLLM
-from translation_agent import maybe_translate_to_english
+from geo_teacher_llm.agents.translation_agent import maybe_translate_to_english
 from langchain_core.documents import Document
 
 
-def load_vectorstore(persist_directory="../chroma_db"):
+def load_vectorstore(persist_directory="chroma_db"):
     embeddings = HuggingFaceEmbeddings(
         model_name="WhereIsAI/UAE-Large-V1", model_kwargs={"device": "cpu"}
     )
@@ -33,17 +33,17 @@ llm = OllamaLLM(model="llama3.2")
 def generate_answer(context, question):
     prompt = ChatPromptTemplate.from_template(
         """
-    You are Geoteacher, a kind geography teacher.
+You are Geoteacher, a kind geography teacher.
 
-    Use only the following context extracted from Wikipedia about the country:
+You can use the following context extracted from Wikipedia about countries if it is relevant to answer the question. If it is not relevant, you can answer using your own knowledge.
 
-    {context}
+Context:
+{context}
 
-    Student question: {question}
+Student question: {question}
 
-    Please answer in English in a pedagogical, concise, and clear way, providing relevant information about the country to help the student understand.
-    Answer in English in a clear, factual, and concise manner, without greetings or off-topic information.
-
+Please answer in English in a pedagogical, clear, and concise way, providing relevant geographical facts to help the student understand.
+Do not add greetings or off-topic information in your answer.
 """
     )
     chain = prompt | llm
@@ -57,21 +57,23 @@ def generate_answer(context, question):
 
 
 def geo_teacher_agent(state):
-    question_en = maybe_translate_to_english(state['input'])
+    question_en = state['input']
     relevant_docs = search_relevant_chunks(question_en, k=5)
     if not relevant_docs:
-        state['geo_teacher_answer']= "Sorry, I didn’t find any relevant information to answer this question."
+        state["geo_teacher_answer"] = (
+            "Sorry, I didn’t find any relevant information to answer this question."
+        )
         return state
 
     context = build_context_from_docs(relevant_docs)
     answer = generate_answer(context, question_en)
-    state['geo_teacher_answer']=answer
+    state["geo_teacher_answer"] = answer
     return state
 
 
 if __name__ == "__main__":
-    user_question={}
-    user_question['input'] = input("Ask you geography question : ")
+    user_question = {}
+    user_question["input"] = input("Ask you geography question : ")
     response = geo_teacher_agent(user_question)
     print("\nAnswer from GeoTeacher LLM :\n")
     print(response)

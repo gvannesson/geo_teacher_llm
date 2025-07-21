@@ -6,6 +6,7 @@ from langgraph.prebuilt import ToolNode
 from langchain_openai import ChatOpenAI
 from langchain_core.tools import Tool
 from langchain_core.prompts import PromptTemplate
+
 # 🚩 1) Définir tes outils wrappers (fonctionnels) pour function calling propre
 from geo_teacher_llm.agents.geo_teacher_agent import geo_teacher_agent
 from geo_teacher_llm.agents.weather_agent import get_weather
@@ -17,10 +18,10 @@ from typing import TypedDict, List, Any
 
 from langsmith import traceable
 
-os.environ["LANGSMITH_TRACING"]="true"
-os.environ["LANGSMITH_ENDPOINT"]="https://api.smith.langchain.com"
-os.environ["LANGSMITH_API_KEY"]="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"
-os.environ["LANGSMITH_PROJECT"]="geo_teacher_llm"
+os.environ["LANGSMITH_TRACING"] = "true"
+os.environ["LANGSMITH_ENDPOINT"] = "https://api.smith.langchain.com"
+os.environ["LANGSMITH_API_KEY"] = "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"
+os.environ["LANGSMITH_PROJECT"] = "geo_teacher_llm"
 
 
 class GeoTeacherState(TypedDict):
@@ -61,7 +62,8 @@ llm = ChatOllama(
 )
 
 # 2️⃣ Router prompt
-router_prompt = PromptTemplate.from_template("""
+router_prompt = PromptTemplate.from_template(
+    """
 
 You are an intelligent router for a geography assistant.
 Analyze the question and answer only with one of these categories:
@@ -70,9 +72,12 @@ Analyze the question and answer only with one of these categories:
 - 'combine' if it's something else
                                              
 Question: {input}
-""")
+"""
+)
 
 from langchain_core.messages import HumanMessage, AIMessage
+
+
 @traceable
 def create_tool_call_message(tool_name, content="", tool_args={}):
     """
@@ -81,16 +86,16 @@ def create_tool_call_message(tool_name, content="", tool_args={}):
     return AIMessage(
         content=content,
         additional_kwargs={
-            "tool_calls": [{
-                "id": "tool_call_id",
-                "function": {
-                    "name": tool_name,
-                    "arguments": tool_args
-                },
-                "type": "function"
-            }]
-        }
+            "tool_calls": [
+                {
+                    "id": "tool_call_id",
+                    "function": {"name": tool_name, "arguments": tool_args},
+                    "type": "function",
+                }
+            ]
+        },
     )
+
 
 @traceable
 def prepare_toolnode_input(state):
@@ -98,12 +103,12 @@ def prepare_toolnode_input(state):
     print(state)
     route = state["route"]
     messages = state["messages"]
-    print('~~~~~~~~###~~~~~~~~~~', route)
-    print('~~~~~~~~###~~~~~~~~~~', messages)
+    print("~~~~~~~~###~~~~~~~~~~", route)
+    print("~~~~~~~~###~~~~~~~~~~", messages)
     route_to_tool_name = {
         "weather": "get_weather_from_capital",
         "images": "get_images_of_country",
-        "combine": "answer_geography_question"
+        "combine": "answer_geography_question",
     }
     tool_name = route_to_tool_name.get(route)
     print(f"🪐 Preparing ToolNode input for tool: {tool_name}")
@@ -118,10 +123,12 @@ llm_router_chain = (
     | router_prompt
     | llm
     | StrOutputParser()
-    | RunnableLambda(lambda output: {
-        "route": output.strip().lower(),
-        "messages": [HumanMessage(content=output.strip())]
-    })
+    | RunnableLambda(
+        lambda output: {
+            "route": output.strip().lower(),
+            "messages": [HumanMessage(content=output.strip())],
+        }
+    )
     | RunnableLambda(prepare_toolnode_input)
 )
 
@@ -140,36 +147,26 @@ workflow.add_node("image_node", image_node)
 
 workflow.set_entry_point("llm_router")
 
+
 @traceable
 def route_decision(state):
     print(f"DEBUG: state keys before routing: {list(state.keys())}")
-    print(state['messages'])
-    print(state['input'])
+    print(state["messages"])
+    print(state["input"])
     user_input = state["input"]
 
     if "weather" in user_input.lower() or "umbrella" in user_input.lower():
         # return {"route": "weather_node"}
-        print('#########weather')
+        print("#########weather")
         return "weather_node"
     elif "images" in user_input.lower() or "population" in user_input.lower():
         # return {"route": "geo_node"}
-        print('#########images')
+        print("#########images")
         return "image_node"
     else:
         # return {"route": "default_node"}
-        print('#########geo')
+        print("#########geo")
         return "geo_node"
-    
-# def route_decision(state):
-#     route = state.get("route", "")
-#     print(f"🧩 Routing with LLM route: {route}")
-#     if route == "weather":
-#         print('######weather')
-#         return "weather_node"
-#     elif route == "images":
-#         return "image_node"
-#     else:  # combine or fallback
-#         return "combine"
 
 
 
@@ -180,8 +177,8 @@ workflow.add_conditional_edges(
         "weather_node": "weather_node",
         "image_node": "image_node",
         "geo_node": "geo_node",
-        "END": END
-    }
+        "END": END,
+    },
 )
 
 
@@ -219,6 +216,6 @@ while True:
 
     with open("langgrpah.png", "wb") as file:
         file.write(png)
-    print('~~~~~~~~~~~~',response)
+    print("~~~~~~~~~~~~", response)
     print("🪐 Réponse de l'agent :\n")
     print(response)

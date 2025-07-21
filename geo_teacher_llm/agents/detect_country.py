@@ -1,6 +1,6 @@
 from rapidfuzz import fuzz, process
 
-COUNTRY_LIST_FILE = "wiki_scraper/country_list.txt"
+COUNTRY_LIST_FILE = "geo_teacher_llm/wiki_scraper/country_list.txt"
 
 ALIASES = {
     "north korea": "democratic_people's_republic_of_korea",
@@ -16,7 +16,7 @@ ALIASES = {
     "netherlands": "netherlands_(kingdom_of_the)",
     "england": "united_kingdom_of_great_britain_and_northern_ireland",
     "great_britain": "united_kingdom_of_great_britain_and_northern_ireland",
-    "UK":"united_kingdom_of_great_britain_and_northern_ireland",
+    "UK": "united_kingdom_of_great_britain_and_northern_ireland",
     "micronesia": "micronesia_(federated_states_of)",
     "Congo Kinshasa": "democratic_republic_of_the_congo",
     "tanzania": "united_republic_of_tanzania",
@@ -24,7 +24,7 @@ ALIASES = {
     "iran": "iran_(islamic_republic_of)",
     "moldova": "republic_of_moldova",
     "congo brazzaville": "republic_of_the_congo",
-    "georgia": "georgia_(the_country)"
+    "georgia": "georgia_(the_country)",
 }
 
 
@@ -47,21 +47,34 @@ def normalize(text: str) -> str:
 
 
 def detect_country_in_question(state: str, threshold=80):
-    question_norm = normalize(state['input'])
+    question_norm = normalize(state["input"])
+
+    if "country" in state and state["country"]:
+        country_current = state["country"].lower()
+
+        # Vérifier s'il correspond à un alias, et normaliser si besoin
+        for alias, country in ALIASES.items():
+            if alias.lower() == country_current:
+                state["country"] = country  # normalisation
+                return state
+
+        # Si le pays actuel est déjà exact, on retourne sans modification
+        if state["country"] in COUNTRIES:
+            return state
+        
+
     for country in COUNTRIES:
         if country.lower() in question_norm:
-            print("liste officielle")
-            state['country']=country
+            state["country"] = country
+
             return state
     # 1. Recherche d'alias dans la question
     for alias, country in ALIASES.items():
         if alias in question_norm:
-            print('alias')
-            state['country']=country
+            state["country"] = country
             return state
- 
-    # 2. Recherche exact dans la liste officielle
 
+    # 2. Recherche exact dans la liste officielle
 
     # 3. Recherche fuzzy dans la liste officielle
     results = process.extract(
@@ -70,8 +83,7 @@ def detect_country_in_question(state: str, threshold=80):
     if results:
         best_match, score, _ = results[0]
         if score >= threshold:
-            print('tentative')
-            state['country']=best_match
+            state["country"] = best_match
             return state
 
     # Pas trouvé
@@ -83,8 +95,7 @@ if __name__ == "__main__":
     questions = [
         "Tell me about North Korea",
         "What is the capital of USA?",
-        "what is the weather in australia ?"
-        "Info on the Bahamas please",
+        "what is the weather in australia ?" "Info on the Bahamas please",
         "Details about Côte d'Ivoire",
         "South Korea history",
     ]

@@ -10,19 +10,23 @@ from pydantic import BaseModel
 
 router = APIRouter()
 
+
 @router.post("/register", response_model=UserRead)
 def register(user: UserCreate, session: Session = Depends(get_session)):
     statement = select(User).where(User.username == user.username)
     existing_user = session.exec(statement).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Nom d'utilisateur déjà utilisé")
-    
+
     hashed_password = get_password_hash(user.password)
-    db_user = User(username=user.username, email=user.email, hashed_password=hashed_password)
+    db_user = User(
+        username=user.username, email=user.email, hashed_password=hashed_password
+    )
     session.add(db_user)
     session.commit()
     session.refresh(db_user)
     return db_user
+
 
 @router.post("/login", response_model=Token)
 def login(username: str, password: str, session: Session = Depends(get_session)):

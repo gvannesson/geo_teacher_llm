@@ -13,17 +13,17 @@ load_dotenv()
 
 # Wrapper pour Weather Agent afin de convertir country_name en capital_name proprement
 def get_weather_from_country(country_name):
-    print('#########', country_name)
     capital_name = get_capital_from_country(country_name)
-    print('~~~~~~~~~~~~~~~', capital_name)
     if capital_name:
         return get_weather(capital_name)
     else:
         return f"Could not find the capital for {country_name}. Please check the country name."
 
+
 # Tool pour GeoTeacherAgent
 def geo_teacher_tool(question):
     return geo_teacher_agent(question)
+
 
 # Définition des tools avec function calling
 tools = [
@@ -58,9 +58,10 @@ agent = initialize_agent(
     verbose=True,
 )
 
+
 def main():
     print("🌍 GeoTeacher LLM - Multi-Agent CLI")
-    index=0
+    index = 0
     while True:
         user_input = input("\nAsk your question about geography (or 'exit') : ")
         if user_input.lower() in ["exit", "quit"]:
@@ -71,7 +72,8 @@ def main():
         print("\n🪐 Answer from the agent :\n")
         print(response["output"])
         print(f"index={index}")
-        index+=1
+        index += 1
+
 
 if __name__ == "__main__":
     main()

@@ -22,8 +22,9 @@ ALIASES = {
     "iran": "iran_(islamic_republic_of)",
     "moldova": "republic_of_moldova",
     "congo brazzaville": "republic_of_the_congo",
-    "georgia": "georgia_(the_country)"
+    "georgia": "georgia_(the_country)",
 }
+
 
 def excel_to_json(excel_path, json_path):
     df = pd.read_excel(excel_path)
@@ -42,6 +43,7 @@ def excel_to_json(excel_path, json_path):
         json.dump(country_to_capital, f, ensure_ascii=False, indent=2)
 
     print(f"✅ Exported {len(country_to_capital)} entries to {json_path}")
+
 
 if __name__ == "__main__":
     excel_path = "country_capital_city.xlsx"  # adapte le chemin selon ton projet
