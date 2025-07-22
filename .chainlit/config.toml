@@ -62,7 +62,8 @@ edit_message = true
 
 [UI]
 # Name of the assistant.
-name = "Assistant"
+name = "Geo Teacher LLM 🌍"
+
 
 # default_theme = "dark"
 
@@ -71,7 +72,8 @@ name = "Assistant"
 # default_sidebar_state = "open"
 
 # Description of the assistant. This is used for HTML tags.
-# description = ""
+description = "Ask me questions about the world !"
+default_view = "side"
 
 # Chain of Thought (CoT) display mode. Can be "hidden", "tool_call" or "full".
 cot = "full"
