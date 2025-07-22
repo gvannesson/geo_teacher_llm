@@ -63,7 +63,7 @@ edit_message = true
 [UI]
 # Name of the assistant.
 name = "Geo Teacher LLM 🌍"
-
+description="Ask me questions about the world !"
 
 # default_theme = "dark"
 
@@ -72,8 +72,7 @@ name = "Geo Teacher LLM 🌍"
 # default_sidebar_state = "open"
 
 # Description of the assistant. This is used for HTML tags.
-description = "Ask me questions about the world !"
-default_view = "side"
+# description = ""
 
 # Chain of Thought (CoT) display mode. Can be "hidden", "tool_call" or "full".
 cot = "full"
@@ -107,7 +106,7 @@ alert_style = "classic"
 # custom_meta_image_url = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
 
 # Load assistant logo directly from URL.
-logo_file_url = ""
+logo_file_url = "https://github.com/gvannesson/geo_teacher_llm/blob/django/geoteacher.jpg?raw=true"
 
 # Load assistant avatar image directly from URL.
 default_avatar_file_url = ""
