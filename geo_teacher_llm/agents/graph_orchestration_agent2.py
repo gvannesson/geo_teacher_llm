@@ -21,12 +21,15 @@ from IPython.display import Image, display
 from typing import TypedDict, List, Any
 from langchain_core.messages import HumanMessage, AIMessage
 from langsmith import traceable
+from dotenv import load_dotenv
+import os
 
+load_dotenv() 
 
-os.environ["LANGSMITH_TRACING"] = "true"
-os.environ["LANGSMITH_ENDPOINT"] = "https://api.smith.langchain.com"
-os.environ["LANGSMITH_API_KEY"] = "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"
-os.environ["LANGSMITH_PROJECT"] = "geo_teacher_llm2"
+os.environ["LANGSMITH_TRACING"] = os.getenv("LANGSMITH_TRACING", "false")
+os.environ["LANGSMITH_ENDPOINT"] = os.getenv("LANGSMITH_ENDPOINT", "")
+os.environ["LANGSMITH_API_KEY"] = os.getenv("LANGSMITH_API_KEY", "")
+os.environ["LANGSMITH_PROJECT"] = os.getenv("LANGSMITH_PROJECT", "")
 
 
 class GeoTeacherState(TypedDict):
@@ -53,12 +56,14 @@ router_prompt = PromptTemplate.from_template(
     """
 You are an intelligent router for a geography assistant.
 
-Analyze the question and decide which categories apply, using only:
-- 'weather' if the question is about meteorological conditions in a place
-- 'images' if the question is about getting pictures of a geographical place
-- 'geography' if it's a question about geography
+Analyze the user's question and decide which categories apply, using only:
+- 'weather' if the question is about meteorological conditions, forecasts, or weather in a place.
+- 'images' if the question explicitly requests photos, pictures, or images of a geographical place.
+- 'geography' if the question is about geographical facts, data, or explanations.
 
 Respond ONLY with the relevant categories, separated by a single space, all in lowercase, with NO explanations or punctuation.
+
+If the user asks about weather but does not explicitly request images, do NOT add 'images'.
 
 Examples:
 - Question: What is the weather in Paris?
@@ -72,7 +77,15 @@ Examples:
 
 - Question: I want to see the weather in Tokyo and pictures.
   Answer: weather images
-  
+
+- Question: Can you give me the forecast for tomorrow in New York?
+  Answer: weather
+
+- Question: Can you show me some beautiful pictures of the Alps?
+  Answer: images
+
+- Question: I want to know the climate in Norway.
+  Answer: weather
 
 Question: {input}
 """
@@ -115,6 +128,7 @@ def router_decision_initial(state):
     order = ["geography", "weather", "images"]
     sorted_categories = [cat for cat in order if cat in categories]
     categories= " ".join(sorted_categories)
+    print(f'#############{categories}')
     if "geography" in categories:
         return "geo_node"
     if "weather" in categories:

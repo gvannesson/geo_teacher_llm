@@ -4,7 +4,11 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_ollama import OllamaLLM
 from geo_teacher_llm.agents.translation_agent import maybe_translate_to_english
 from langchain_core.documents import Document
+from langchain_groq import ChatGroq
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 
 def load_vectorstore(persist_directory="chroma_db"):
     embeddings = HuggingFaceEmbeddings(
@@ -27,7 +31,12 @@ def build_context_from_docs(relevant_docs):
     return context
 
 
-llm = OllamaLLM(model="llama3.2")
+# llm = OllamaLLM(model="llama3.2")
+llm = ChatGroq(
+    api_key=os.getenv("GROQ_KEY"),
+    model_name="llama3-8b-8192"  # ou "mixtral-8x7b-32768", selon ce que tu veux
+
+)
 
 
 def generate_answer(context, question):
@@ -43,7 +52,11 @@ Context:
 Student question: {question}
 
 Please answer in English in a pedagogical, clear, and concise way, providing relevant geographical facts to help the student understand.
-Do not add greetings or off-topic information in your answer.
+
+Do not add greetings, off-topic information
+Under no circumstances should you mention images, pictures, photos, or your inability to provide images, even if the student requests them.
+Focus only on answering the geographical aspects of the question.
+Limit your answer to 5 sentences maximum.
 """
     )
     chain = prompt | llm

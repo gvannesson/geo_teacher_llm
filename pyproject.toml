@@ -44,7 +44,9 @@ dependencies = [
     "jwt>=1.4.0",
     "django>=5.2.4",
     "unidecode>=1.4.0",
-    "chainlit>=0.1.0",
+    "groq>=0.30.0",
+    "langchain-groq>=0.3.6",
+    "git-filter-repo>=2.47.0",
 ]
 
 [tool.poetry]

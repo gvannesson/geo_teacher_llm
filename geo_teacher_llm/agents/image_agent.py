@@ -16,14 +16,16 @@ def fetch_country_landscape_images(state, num_images=2):
         raise ValueError("UNSPLASH_ACCESS_KEY environment variable not set.")
 
     # Déterminer le terme de recherche priorisé : city > capital_city > country
-    search_location = state.get("city") or state.get("country")
-
-    if not search_location:
+    if "city" in state and "country" in state:
+        search_location = f"{state['city']} {state['country']}"
+    elif "country" in state:
+        search_location = state["country"]
+    else:
         print("❌ Aucun 'city', 'capital_city', ni 'country' disponible, skipping fetch.")
         return state
 
     params = {
-        "query": f"{search_location} landscape",
+        "query": f"{search_location}",
         "per_page": num_images,
         "client_id": UNSPLASH_ACCESS_KEY,
         "orientation": "landscape",
