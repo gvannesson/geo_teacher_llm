@@ -47,6 +47,8 @@ def normalize(text: str) -> str:
 
 
 def detect_country_in_question(state: str, threshold=80):
+    print(state)
+    print("ééééééééééééééé")
     question_norm = normalize(state["input"])
 
     if "country" in state and state["country"]:

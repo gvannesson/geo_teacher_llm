@@ -1,13 +1,22 @@
 version: '3.9'
 
 services:
-  geo_teacher:
-    build: .
-    container_name: geo_teacher_llm
+  geo_teacher_chainlit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: geo_teacher_chainlit
     ports:
-      - "8000:8000"
+      - "7860:7860"  # port Chainlit
     env_file:
       - .env
     volumes:
-      - .:/app
+      - ./geo_teacher_llm:/app/geo_teacher_llm:rw
+      - ./geo_teacher_chainlit:/app/geo_teacher_chainlit:rw
+      - ./chroma_db:/app/chroma_db:rw
     restart: unless-stopped
+    command: chainlit run geo_teacher_chainlit/app.py --host 0.0.0.0 --port 7860
+
+
+  # Pour le moment, tu utilises le montage direct, donc pas besoin de volumes nommés,
+  # mais tu peux les ajouter plus tard pour gérer la persistance en prod proprement.

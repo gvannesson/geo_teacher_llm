@@ -3,9 +3,6 @@ __pycache__/
 *.pyo
 *.pyd
 *.db
-*.sqlite3
-.env
-.env.*
 .git
 .gitignore
 geo_llm/
@@ -14,3 +11,8 @@ notebooks/
 geo_teacher_api/
 geo_teacher_django/
 .github/
+data/
+logs/
+outputs/
+cache/
+.venv

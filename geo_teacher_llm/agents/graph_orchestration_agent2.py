@@ -24,6 +24,8 @@ from langsmith import traceable
 from dotenv import load_dotenv
 import os
 
+from geo_teacher_llm.agents.geo_teacher_agent import llm
+
 load_dotenv() 
 
 os.environ["LANGSMITH_TRACING"] = os.getenv("LANGSMITH_TRACING", "false")
@@ -49,7 +51,7 @@ class GeoTeacherState(TypedDict):
     route: list
 
 
-llm = ChatOllama(model="llama3.2", temperature=0, base_url="http://localhost:11434")
+# llm = ChatOllama(model="llama3.2", temperature=0, base_url="http://localhost:11434")
 
 # 2️⃣ Router prompt
 router_prompt = PromptTemplate.from_template(
@@ -159,7 +161,7 @@ def router_decision_after_weather(state):
     order = ["geography", "weather", "images"]
     sorted_categories = [cat for cat in order if cat in categories]
     categories= " ".join(sorted_categories)
-    if "images" in categories:
+    if "geography" in categories or "images" in categories:
         return "image_node"
     else:
         return "END"
@@ -177,16 +179,18 @@ workflow.add_conditional_edges(
     },
 )
 
+workflow.add_edge("geo_node", "weather_node")
 
-workflow.add_conditional_edges(
-    "geo_node",
-    router_decision_after_geo,
-    {
-        "weather_node": "weather_node",
-        "image_node": "image_node",
-        "END": END
-    }
-)
+
+# workflow.add_conditional_edges(
+#     "geo_node",
+#     router_decision_after_geo,
+#     {
+#         "weather_node": "weather_node",
+#         "image_node": "image_node",
+#         "END": END
+#     }
+# )
 
 workflow.add_edge("weather_node", "activity_agent")
 
@@ -201,9 +205,6 @@ workflow.add_conditional_edges(
 )
 
 
-workflow.add_edge("geo_node", END)
-workflow.add_edge("activity_agent", END)
-workflow.add_edge("image_node", END)
 
 
 

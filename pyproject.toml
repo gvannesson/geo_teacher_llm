@@ -23,7 +23,6 @@ dependencies = [
     "transformers>=4.53.0",
     "torch>=2.7.1",
     "langdetect>=1.0.9",
-    "sentencepiece>=0.2.0",
     "sacremoses>=0.1.1",
     "ruff>=0.12.2",
     "black>=25.1.0",
@@ -37,7 +36,6 @@ dependencies = [
     "passlib>=1.7.4",
     "sqlmodel>=0.0.24",
     "psycopg2-binary>=2.9.10",
-    "fastapi>=0.116.0",
     "sqlalchemy>=2.0.41",
     "uvicorn>=0.35.0",
     "pydantic[email]>=2.11.7",
@@ -47,41 +45,6 @@ dependencies = [
     "groq>=0.30.0",
     "langchain-groq>=0.3.6",
     "git-filter-repo>=2.47.0",
+    "chainlit>=2.0.5,<2.6.1",
+    "fastapi>=0.115.3,<0.116",
 ]
-
-[tool.poetry]
-name = "geo-teacher-llm"
-version = "0.1.0"
-description = ""
-authors = ["Ton Nom <ton.email@example.com>"]
-
-packages = [
-  { include = "geo_teacher_llm" }
-]
-
-[tool.black]
-line-length = 88
-target-version = ["py312"]
-exclude = '''
-/(
-    \.venv
-  | build
-  | dist
-)/
-'''
-
-[tool.ruff]
-line-length = 88
-target-version = "py312"
-exclude = ["build", "dist", ".venv"]
-
-[tool.ruff.lint]
-select = ["E", "F", "W", "I"]
-ignore = ["E501"] # si tu souhaites ignorer la limite de ligne
-
-[tool.ruff.format]
-quote-style = "double"
-
-[build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"

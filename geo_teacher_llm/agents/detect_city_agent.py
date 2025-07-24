@@ -5,14 +5,14 @@ import requests
 from langchain_ollama import OllamaLLM
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-
+from geo_teacher_llm.agents.geo_teacher_agent import llm
 # 1️⃣ Définir l'agent
 def detect_city_agent(state: Dict[str, Any]) -> Dict[str, Any]:
     user_input = state.get("input")
 
     # ---- Step 1: Extraction de ville via Ollama ----
-    model = OllamaLLM(model="llama3.2")  # ou mistral, phi, gemma selon ton setup
-
+    # model = OllamaLLM(model="llama3.2")  # ou mistral, phi, gemma selon ton setup
+    model=llm
     prompt = PromptTemplate(
         template=(
             "Extract ONLY the name of the city mentioned in the following text. "
@@ -25,6 +25,7 @@ def detect_city_agent(state: Dict[str, Any]) -> Dict[str, Any]:
 
     chain = prompt | model | StrOutputParser()
     extracted_city = chain.invoke({"text": user_input}).strip()
+    print(extracted_city)
     if extracted_city.lower() == "none" or not extracted_city:
         state["city"] = None
         state["country"] = None
@@ -47,7 +48,8 @@ def detect_city_agent(state: Dict[str, Any]) -> Dict[str, Any]:
             "https://nominatim.openstreetmap.org/search",
             params=params,
             headers=headers,
-            timeout=10
+            timeout=30,
+            verify=True
         )
         response.raise_for_status()
         results = response.json()
